@@ -1,8 +1,7 @@
 # Python build + tooling
 __pycache__/
-*.py[cod]
-*.pyo
-*.pyd
+*.egg-info/
+.internship_bot/
 *.pyc
 .mypy_cache/
 .pytest_cache/

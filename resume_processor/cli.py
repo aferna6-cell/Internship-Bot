@@ -4,27 +4,37 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
+from .analysis.optimizer import optimize_schema
 from .config import (
-    preferences_to_dict,
     load_preferences,
+    preferences_to_dict,
     save_preferences,
     update_preferences,
+    UserPreferences,
 )
 from .parsing.factory import parse_resume
+from .profile_sources import fetch_linkedin_artifacts, fetch_portfolio_artifacts
+from .schema import to_json_ready
+from .profile_optimizer import (
+    LinkedInProfile,
+    PortfolioArtifact,
+    build_default_optimizer,
+    render_cli_report,
+    report_to_json,
+)
+from .schema import ResumeSchema
 
 
 def parse_command(args: argparse.Namespace) -> None:
     schema = parse_resume(args.file)
+    if getattr(args, "optimize", False):
+        schema = optimize_schema(schema)
     output = schema.to_dict()
     if args.include_preferences:
         output["preferences"] = preferences_to_dict(load_preferences())
-    payload = json.dumps(output, indent=2 if args.pretty else None)
-    if args.output:
-        Path(args.output).write_text(payload, encoding="utf-8")
-    else:
-        print(payload)
+    _emit_json(output, args.pretty, args.output)
 
 
 def show_preferences(_: argparse.Namespace) -> None:
@@ -63,6 +73,59 @@ def _split_csv(value: str | None) -> List[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def fetch_linkedin_command(args: argparse.Namespace) -> None:
+    artifacts = fetch_linkedin_artifacts(args.file)
+    _emit_json(to_json_ready(artifacts), args.pretty, args.output)
+
+
+def fetch_portfolio_command(args: argparse.Namespace) -> None:
+    artifacts = fetch_portfolio_artifacts(args.location)
+    _emit_json(to_json_ready(artifacts), args.pretty, args.output)
+def _load_json(path: str) -> dict:
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def _load_preferences_file(path: str | None) -> UserPreferences:
+    if not path:
+        return load_preferences()
+    payload = _load_json(path)
+    return UserPreferences(
+        preferred_locations=payload.get("preferred_locations", []),
+        role_types=payload.get("role_types", []),
+        desired_technologies=payload.get("desired_technologies", []),
+    )
+
+
+def optimize_profiles(args: argparse.Namespace) -> None:
+    schema_data = _load_json(args.resume_schema)
+    resume = ResumeSchema.from_dict(schema_data)
+    preferences = _load_preferences_file(args.preferences)
+    linkedin = (
+        LinkedInProfile.from_dict(_load_json(args.linkedin)) if args.linkedin else None
+    )
+    portfolio = (
+        PortfolioArtifact.from_dict(_load_json(args.portfolio)) if args.portfolio else None
+    )
+
+    optimizer = build_default_optimizer()
+    report = optimizer.optimize(
+        resume=resume,
+        preferences=preferences,
+        linkedin=linkedin,
+        portfolio=portfolio,
+    )
+
+    if args.format == "json":
+        payload = report_to_json(report)
+    else:
+        payload = render_cli_report(report)
+
+    if args.output:
+        Path(args.output).write_text(payload, encoding="utf-8")
+    else:
+        print(payload)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Internship Bot resume utilities")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -75,6 +138,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--include-preferences",
         action="store_true",
         help="Include stored preference configuration in the output",
+    )
+    parse_parser.add_argument(
+        "--optimize",
+        action="store_true",
+        help="Run the optimization pass and emit the enriched schema in JSON",
     )
     parse_parser.set_defaults(func=parse_command)
 
@@ -95,7 +163,66 @@ def build_parser() -> argparse.ArgumentParser:
     interactive_parser = prefs_sub.add_parser("interactive", help="Interactive preference editor")
     interactive_parser.set_defaults(func=interactive_preferences)
 
+    profile_parser = subparsers.add_parser(
+        "profile", help="Fetch external profile data (LinkedIn exports, portfolios)"
+    )
+    profile_sub = profile_parser.add_subparsers(dest="profile_command", required=True)
+
+    linkedin_parser = profile_sub.add_parser("linkedin", help="Parse a LinkedIn export file")
+    linkedin_parser.add_argument("file", help="Path to the LinkedIn export (JSON/ZIP)")
+    _add_output_args(linkedin_parser)
+    linkedin_parser.set_defaults(func=fetch_linkedin_command)
+
+    portfolio_parser = profile_sub.add_parser(
+        "portfolio", help="Fetch a portfolio URL or local file"
+    )
+    portfolio_parser.add_argument("location", help="URL, file path, or file:// reference")
+    _add_output_args(portfolio_parser)
+    portfolio_parser.set_defaults(func=fetch_portfolio_command)
+    optimize_parser = subparsers.add_parser(
+        "optimize",
+        help="Generate optimization suggestions for a resume + LinkedIn profile",
+    )
+    optimize_parser.add_argument(
+        "--resume-schema",
+        required=True,
+        help="Path to a JSON document that matches the ResumeSchema",
+    )
+    optimize_parser.add_argument(
+        "--linkedin",
+        help="Optional LinkedIn artifact JSON (headline, about, skills, experiences)",
+    )
+    optimize_parser.add_argument(
+        "--portfolio",
+        help="Optional portfolio artifact JSON (url, projects, highlights)",
+    )
+    optimize_parser.add_argument(
+        "--preferences",
+        help="Optional preferences JSON; defaults to stored configuration",
+    )
+    optimize_parser.add_argument(
+        "--format",
+        choices=["text", "json"],
+        default="text",
+        help="Output format",
+    )
+    optimize_parser.add_argument("--output", help="Optional file to store the report")
+    optimize_parser.set_defaults(func=optimize_profiles)
+
     return parser
+
+
+def _add_output_args(subparser: argparse.ArgumentParser) -> None:
+    subparser.add_argument("--output", help="Optional file to write JSON output")
+    subparser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
+
+
+def _emit_json(data: Any, pretty: bool, output: str | None) -> None:
+    payload = json.dumps(data, indent=2 if pretty else None)
+    if output:
+        Path(output).write_text(payload, encoding="utf-8")
+    else:
+        print(payload)
 
 
 def main(argv: List[str] | None = None) -> None:
