@@ -1,0 +1,21 @@
+[project]
+name = "internship-bot"
+version = "0.1.0"
+description = "Automation toolkit for applying to internships across portals"
+authors = [{name = "Internship Bot"}]
+requires-python = ">=3.10"
+dependencies = [
+    "playwright>=1.41",
+    "cryptography>=41.0",
+    "python-dotenv>=1.0",
+    "tenacity>=8.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
