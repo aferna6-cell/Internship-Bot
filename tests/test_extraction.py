@@ -10,3 +10,6 @@ def test_build_schema_from_text_extracts_sections():
     assert any(skill.name == "Python" for skill in schema.skills)
     assert schema.timeline_constraints, "Expected at least one timeline constraint"
     assert any(industry.name == "finance" for industry in schema.target_industries)
+    assert schema.artifact_profiles, "Artifact profiles should be populated"
+    assert schema.project_ideas and schema.project_ideas[0].technologies
+    assert schema.optimization_suggestions, "Baseline suggestions should exist"
