@@ -1,0 +1,19 @@
+{
+  "profile": {
+    "first_name": "Alex",
+    "last_name": "Smith",
+    "headline": "Product-focused software engineer",
+    "summary": "I build backend services that power delightful internship experiences.",
+    "public_profile_url": "https://www.linkedin.com/in/alex-smith"
+  },
+  "positions": [
+    {
+      "title": "Software Engineering Intern",
+      "company": "Fictional Robotics",
+      "start": "2023-06-01",
+      "end": "2023-09-01",
+      "description": "Built data tooling for warehouse robots and launched a metrics API."
+    }
+  ],
+  "skills": ["Python", "APIs", "Robotics"]
+}
