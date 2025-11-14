@@ -6,9 +6,10 @@ import json
 from pathlib import Path
 from typing import List
 
+from .analysis.optimizer import optimize_schema
 from .config import (
-    preferences_to_dict,
     load_preferences,
+    preferences_to_dict,
     save_preferences,
     update_preferences,
     UserPreferences,
@@ -26,6 +27,8 @@ from .schema import ResumeSchema
 
 def parse_command(args: argparse.Namespace) -> None:
     schema = parse_resume(args.file)
+    if getattr(args, "optimize", False):
+        schema = optimize_schema(schema)
     output = schema.to_dict()
     if args.include_preferences:
         output["preferences"] = preferences_to_dict(load_preferences())
@@ -129,6 +132,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--include-preferences",
         action="store_true",
         help="Include stored preference configuration in the output",
+    )
+    parse_parser.add_argument(
+        "--optimize",
+        action="store_true",
+        help="Run the optimization pass and emit the enriched schema in JSON",
     )
     parse_parser.set_defaults(func=parse_command)
 
