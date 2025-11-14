@@ -4,7 +4,16 @@ from __future__ import annotations
 import re
 from typing import Dict, Iterable, List
 
-from ..schema import ResumeSchema, ResumeFact, Skill, TimelineConstraint, TargetIndustry
+from ..schema import (
+    ArtifactProfile,
+    OptimizationSuggestion,
+    ProjectIdea,
+    ResumeFact,
+    ResumeSchema,
+    Skill,
+    TimelineConstraint,
+    TargetIndustry,
+)
 
 EMAIL_REGEX = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 PHONE_REGEX = re.compile(r"(?:(?:\+?\d{1,3})[ -]?)?(?:\(\d{3}\)|\d{3})[ -]?\d{3}[ -]?\d{4}")
@@ -76,6 +85,47 @@ def extract_sections(lines: List[str]) -> Dict[str, str]:
     return {key: "\n".join(value) for key, value in sections.items()}
 
 
+def extract_artifact_profiles(lines: List[str], contact: Dict[str, str]) -> List[ArtifactProfile]:
+    artifacts: List[ArtifactProfile] = []
+    websites = contact.get("websites")
+    if websites:
+        seen_links = set()
+        for raw_url in websites.split(","):
+            url = raw_url.strip()
+            if not url or url in seen_links:
+                continue
+            seen_links.add(url)
+            lowered = url.lower()
+            tags = [tag for tag in ("github", "portfolio", "website") if tag in lowered]
+            title = "GitHub Portfolio" if "github" in lowered else "Online Artifact"
+            artifacts.append(
+                ArtifactProfile(
+                    title=title,
+                    description="Link provided in contact details",
+                    link=url,
+                    tags=tags,
+                )
+            )
+    for line in lines:
+        lowered = line.lower()
+        if "project" in lowered and len(line) > 10:
+            artifacts.append(
+                ArtifactProfile(
+                    title=line[:60],
+                    description=line,
+                    tags=["project"],
+                )
+            )
+    if not artifacts and lines:
+        artifacts.append(
+            ArtifactProfile(
+                title=f"Profile: {lines[0]}",
+                description="Placeholder artifact derived from resume heading.",
+            )
+        )
+    return artifacts
+
+
 def extract_timeline_constraints(text: str) -> List[TimelineConstraint]:
     constraints: List[TimelineConstraint] = []
     for match in YEAR_RANGE_REGEX.finditer(text):
@@ -105,16 +155,81 @@ def extract_target_industries(text: str) -> List[TargetIndustry]:
     return industries
 
 
+def generate_project_ideas(skills: List[Skill], industries: List[TargetIndustry]) -> List[ProjectIdea]:
+    if not skills:
+        return []
+    ideas: List[ProjectIdea] = []
+    primary_skill = skills[0].name
+    industry_names = [industry.name for industry in industries] or ["general"]
+    for name in industry_names[:2]:
+        if name == "general":
+            title = f"{primary_skill} showcase project"
+            summary = (
+                f"Build a portfolio-ready project that highlights {primary_skill} capabilities."
+            )
+        else:
+            title = f"{primary_skill} for {name}"
+            summary = (
+                f"Prototype a {name} solution demonstrating {primary_skill} expertise."
+            )
+        ideas.append(ProjectIdea(name=title, summary=summary, technologies=[primary_skill]))
+    return ideas
+
+
+def baseline_optimization_suggestions(
+    skills: List[Skill], contact: Dict[str, str], artifacts: List[ArtifactProfile]
+) -> List[OptimizationSuggestion]:
+    suggestions: List[OptimizationSuggestion] = [
+        OptimizationSuggestion(
+            suggestion="Tailor the resume summary toward a specific role",
+            rationale="Generic summaries are harder to match with roles.",
+            priority="medium",
+        )
+    ]
+    if not contact.get("websites"):
+        suggestions.append(
+            OptimizationSuggestion(
+                suggestion="Add a portfolio or GitHub link",
+                rationale="No web presence was detected in the contact block.",
+                priority="high",
+            )
+        )
+    if len(skills) < 3:
+        suggestions.append(
+            OptimizationSuggestion(
+                suggestion="List at least three core skills",
+                rationale="Applicant tracking systems rank resumes with explicit skill keywords.",
+                priority="high",
+            )
+        )
+    if any(not artifact.link for artifact in artifacts):
+        suggestions.append(
+            OptimizationSuggestion(
+                suggestion="Attach URLs to described projects",
+                rationale="Projects without links are harder to verify.",
+                priority="medium",
+            )
+        )
+    return suggestions
+
+
 def build_schema_from_text(text: str) -> ResumeSchema:
     lines = normalise_lines(text)
     sections = extract_sections(lines)
+    contact = extract_contact(text)
+    skills = extract_skills(sections)
+    target_industries = extract_target_industries(text)
+    artifact_profiles = extract_artifact_profiles(lines, contact)
     schema = ResumeSchema(
         name=extract_name(lines),
-        contact=extract_contact(text),
+        contact=contact,
         facts=extract_facts(lines),
-        skills=extract_skills(sections),
+        skills=skills,
         timeline_constraints=extract_timeline_constraints(text),
-        target_industries=extract_target_industries(text),
+        target_industries=target_industries,
+        artifact_profiles=artifact_profiles,
+        optimization_suggestions=baseline_optimization_suggestions(skills, contact, artifact_profiles),
+        project_ideas=generate_project_ideas(skills, target_industries),
         raw_text=text,
     )
     return schema
