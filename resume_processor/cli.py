@@ -11,8 +11,17 @@ from .config import (
     load_preferences,
     save_preferences,
     update_preferences,
+    UserPreferences,
 )
 from .parsing.factory import parse_resume
+from .profile_optimizer import (
+    LinkedInProfile,
+    PortfolioArtifact,
+    build_default_optimizer,
+    render_cli_report,
+    report_to_json,
+)
+from .schema import ResumeSchema
 
 
 def parse_command(args: argparse.Namespace) -> None:
@@ -63,6 +72,51 @@ def _split_csv(value: str | None) -> List[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def _load_json(path: str) -> dict:
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def _load_preferences_file(path: str | None) -> UserPreferences:
+    if not path:
+        return load_preferences()
+    payload = _load_json(path)
+    return UserPreferences(
+        preferred_locations=payload.get("preferred_locations", []),
+        role_types=payload.get("role_types", []),
+        desired_technologies=payload.get("desired_technologies", []),
+    )
+
+
+def optimize_profiles(args: argparse.Namespace) -> None:
+    schema_data = _load_json(args.resume_schema)
+    resume = ResumeSchema.from_dict(schema_data)
+    preferences = _load_preferences_file(args.preferences)
+    linkedin = (
+        LinkedInProfile.from_dict(_load_json(args.linkedin)) if args.linkedin else None
+    )
+    portfolio = (
+        PortfolioArtifact.from_dict(_load_json(args.portfolio)) if args.portfolio else None
+    )
+
+    optimizer = build_default_optimizer()
+    report = optimizer.optimize(
+        resume=resume,
+        preferences=preferences,
+        linkedin=linkedin,
+        portfolio=portfolio,
+    )
+
+    if args.format == "json":
+        payload = report_to_json(report)
+    else:
+        payload = render_cli_report(report)
+
+    if args.output:
+        Path(args.output).write_text(payload, encoding="utf-8")
+    else:
+        print(payload)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Internship Bot resume utilities")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -94,6 +148,36 @@ def build_parser() -> argparse.ArgumentParser:
 
     interactive_parser = prefs_sub.add_parser("interactive", help="Interactive preference editor")
     interactive_parser.set_defaults(func=interactive_preferences)
+
+    optimize_parser = subparsers.add_parser(
+        "optimize",
+        help="Generate optimization suggestions for a resume + LinkedIn profile",
+    )
+    optimize_parser.add_argument(
+        "--resume-schema",
+        required=True,
+        help="Path to a JSON document that matches the ResumeSchema",
+    )
+    optimize_parser.add_argument(
+        "--linkedin",
+        help="Optional LinkedIn artifact JSON (headline, about, skills, experiences)",
+    )
+    optimize_parser.add_argument(
+        "--portfolio",
+        help="Optional portfolio artifact JSON (url, projects, highlights)",
+    )
+    optimize_parser.add_argument(
+        "--preferences",
+        help="Optional preferences JSON; defaults to stored configuration",
+    )
+    optimize_parser.add_argument(
+        "--format",
+        choices=["text", "json"],
+        default="text",
+        help="Output format",
+    )
+    optimize_parser.add_argument("--output", help="Optional file to store the report")
+    optimize_parser.set_defaults(func=optimize_profiles)
 
     return parser
 
