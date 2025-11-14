@@ -1,5 +1,43 @@
+# Python build + tooling
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
 *.pyc
-.env
 .mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+.eggs/
+*.egg-info/
 .venv/
+.env
+.env.*
+
+# Node/automation tooling
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+playwright-report/
+test-results/
+
+# Logs & artifacts
+logs/
+*.log
+*.sqlite3
+coverage/
+.DS_Store
+
+# Generated data & secrets
+secrets/
+.envrc
+*.pem
+*.key
+
+# Local editor/project files
+.idea/
+.vscode/
+*.swp
