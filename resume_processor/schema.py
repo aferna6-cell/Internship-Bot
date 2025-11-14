@@ -50,6 +50,9 @@ class ProfileArtifact:
     content_snippet: str
     url: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
 class ArtifactProfile:
     """Metadata about notable projects or portfolio artifacts."""
 
