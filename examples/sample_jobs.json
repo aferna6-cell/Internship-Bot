@@ -1,0 +1,138 @@
+[
+  {
+    "provider": "SampleBoard",
+    "id": "redwood-platform-engineering-intern",
+    "company": "Redwood Dynamics",
+    "role": "Platform Engineering Intern",
+    "location": "Remote - US",
+    "description": "Build internal developer tooling and APIs powering Redwood's logistics platform.",
+    "requirements": [
+      {"skill": "python", "level": "advanced", "required": true},
+      {"skill": "fastapi", "required": true},
+      {"skill": "postgresql", "required": false}
+    ],
+    "technologies": ["Python", "FastAPI", "PostgreSQL", "Redis"],
+    "apply_url": "https://careers.redwood.example/jobs/platform-engineering-intern",
+    "posted_at": "2025-11-12T00:00:00Z",
+    "metadata": {"work_model": "Remote", "compensation": "USD 42/hr"}
+  },
+  {
+    "provider": "SampleBoard",
+    "id": "northwind-robotics-controls-intern",
+    "company": "Northwind Robotics",
+    "role": "Controls Systems Intern",
+    "location": "Austin, TX",
+    "description": "Prototype motion-planning algorithms for autonomous warehouse robots.",
+    "requirements": [
+      {"skill": "c++", "required": true},
+      {"skill": "ros", "required": true},
+      {"skill": "embedded linux", "required": false}
+    ],
+    "technologies": ["C++", "ROS", "Embedded Linux", "Docker"],
+    "apply_url": "https://northwind.example/careers/controls-systems-intern",
+    "posted_at": "2025-11-10T00:00:00Z",
+    "metadata": {"work_model": "Hybrid", "team": "Autonomy"}
+  },
+  {
+    "provider": "SampleBoard",
+    "id": "celestial-analytics-data-science-fellow",
+    "company": "Celestial Analytics",
+    "role": "Data Science Fellow",
+    "location": "New York, NY",
+    "description": "Analyze mobility datasets and deploy machine learning models for transportation agencies.",
+    "requirements": [
+      {"skill": "python", "required": true},
+      {"skill": "pandas", "required": true},
+      {"skill": "apache spark", "required": false}
+    ],
+    "technologies": ["Python", "Pandas", "Spark", "Airflow"],
+    "apply_url": "https://celestial.example/jobs/data-science-fellow",
+    "posted_at": "2025-11-08T00:00:00Z",
+    "metadata": {"work_model": "Onsite", "discipline": "Data"}
+  },
+  {
+    "provider": "SampleBoard",
+    "id": "lumen-health-frontend-intern",
+    "company": "Lumen Health",
+    "role": "Frontend Engineering Intern",
+    "location": "Seattle, WA",
+    "description": "Implement patient experience dashboards with delightful UI polish.",
+    "requirements": [
+      {"skill": "typescript", "required": true},
+      {"skill": "react", "required": true},
+      {"skill": "tailwind css", "required": false}
+    ],
+    "technologies": ["TypeScript", "React", "Tailwind", "Jest"],
+    "apply_url": "https://lumenhealth.example/jobs/frontend-intern",
+    "posted_at": "2025-11-05T00:00:00Z",
+    "metadata": {"work_model": "Hybrid", "team": "Patient Experience"}
+  },
+  {
+    "provider": "SampleBoard",
+    "id": "oceanic-labs-devops-intern",
+    "company": "Oceanic Labs",
+    "role": "DevOps Intern",
+    "location": "Boston, MA",
+    "description": "Automate observability and release workflows for ocean-monitoring platforms.",
+    "requirements": [
+      {"skill": "go", "required": true},
+      {"skill": "kubernetes", "required": true},
+      {"skill": "terraform", "required": false}
+    ],
+    "technologies": ["Go", "Kubernetes", "Terraform", "Prometheus"],
+    "apply_url": "https://oceanic.example/jobs/devops-intern",
+    "posted_at": "2025-11-04T00:00:00Z",
+    "metadata": {"work_model": "Onsite", "team": "Infrastructure"}
+  },
+  {
+    "provider": "SampleBoard",
+    "id": "quantum-ridge-ml-research-intern",
+    "company": "Quantum Ridge",
+    "role": "ML Research Intern",
+    "location": "San Francisco, CA",
+    "description": "Explore multimodal transformers for geospatial datasets.",
+    "requirements": [
+      {"skill": "python", "required": true},
+      {"skill": "pytorch", "required": true},
+      {"skill": "cuda", "required": false}
+    ],
+    "technologies": ["Python", "PyTorch", "CUDA", "Weights & Biases"],
+    "apply_url": "https://quantumridge.example/jobs/ml-research-intern",
+    "posted_at": "2025-11-03T00:00:00Z",
+    "metadata": {"work_model": "Hybrid", "discipline": "Research"}
+  },
+  {
+    "provider": "SampleBoard",
+    "id": "altitude-aero-simulation-intern",
+    "company": "Altitude Aero",
+    "role": "Simulation Engineering Intern",
+    "location": "Denver, CO",
+    "description": "Enhance digital twin simulations for electric aircraft.",
+    "requirements": [
+      {"skill": "c#", "required": true},
+      {"skill": "unity", "required": true},
+      {"skill": "matlab", "required": false}
+    ],
+    "technologies": ["C#", "Unity", "MATLAB", "Azure"],
+    "apply_url": "https://altitude.example/jobs/simulation-intern",
+    "posted_at": "2025-11-01T00:00:00Z",
+    "metadata": {"work_model": "Onsite", "team": "Simulation"}
+  },
+  {
+    "provider": "SampleBoard",
+    "id": "blue-meadow-finance-backend-intern",
+    "company": "Blue Meadow Finance",
+    "role": "Backend Engineering Intern",
+    "location": "Chicago, IL",
+    "description": "Ship resilient financial APIs handling millions of requests per day.",
+    "requirements": [
+      {"skill": "java", "required": true},
+      {"skill": "spring", "required": true},
+      {"skill": "kafka", "required": false}
+    ],
+    "technologies": ["Java", "Spring Boot", "Kafka", "PostgreSQL"],
+    "apply_url": "https://bluemeadow.example/jobs/backend-intern",
+    "posted_at": "2025-10-30T00:00:00Z",
+    "metadata": {"work_model": "Hybrid", "team": "Core Banking"}
+  }
+]

@@ -40,6 +40,7 @@ class CustomHTMLScraper(JobConnector):
                         location=location.get_text(strip=True) if location else None,
                         description=description.get_text(strip=True) if description else "",
                         requirements=requirements,
+                        technologies=[req.skill for req in requirements],
                         apply_url=apply_link["href"] if apply_link else None,
                         posted_at=datetime.utcnow(),
                         metadata={"scraped": True},
