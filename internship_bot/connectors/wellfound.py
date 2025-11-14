@@ -20,6 +20,10 @@ class WellfoundConnector(JobConnector):
         return self._mock_jobs(query)
 
     def _mock_jobs(self, query: str) -> List[JobListing]:
+        requirements = [
+            JobRequirement(skill="python"),
+            JobRequirement(skill="react", required=False),
+        ]
         return [
             JobListing(
                 provider=self.provider_name,
@@ -28,10 +32,8 @@ class WellfoundConnector(JobConnector):
                 role=f"{query.title()} Platform Intern",
                 location="San Francisco, CA",
                 description="Join a seed-stage startup building AI copilots.",
-                requirements=[
-                    JobRequirement(skill="python"),
-                    JobRequirement(skill="react", required=False),
-                ],
+                requirements=requirements,
+                technologies=[req.skill for req in requirements],
                 apply_url="https://wellfound.com/company/mock/jobs/1",
                 posted_at=datetime.utcnow(),
                 metadata={"mock": True},

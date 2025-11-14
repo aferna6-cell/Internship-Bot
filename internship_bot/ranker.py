@@ -35,7 +35,9 @@ class Ranker:
 
         normalized_skills = resume.normalized_skills()
         job_requirements = [req.skill.lower() for req in job.requirements]
-        skill_matches = len(set(normalized_skills) & set(job_requirements))
+        job_technologies = [tech.lower() for tech in job.technologies]
+        job_skill_pool = set(job_requirements + job_technologies)
+        skill_matches = len(set(normalized_skills) & job_skill_pool)
         if skill_matches:
             points = skill_matches * 5
             score += points

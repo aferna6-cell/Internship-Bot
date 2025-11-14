@@ -154,6 +154,14 @@ python main.py
 
 The `main.py` demo uses mock data when live API credentials are unavailable, producing a ranked list
 of internship leads.
+
+### Sample job feed for the `rank-jobs` workflow
+
+Need deterministic input for the ranking heuristics? The repository now includes
+`examples/sample_jobs.json`, a curated list of 8 canonical `JobPosting` records
+with varied locations, titles, and tech stacks. Point the `rank-jobs` workflow
+at this file (for example, `--jobs-file examples/sample_jobs.json`) to see the
+overlap scoring without wiring up live connectors.
 # Internship-Bot
 
 Internship-Bot is a monorepo that automates the entire internship search and

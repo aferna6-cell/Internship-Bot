@@ -20,6 +20,10 @@ class IndeedConnector(JobConnector):
 
     def _mock_jobs(self, query: str) -> List[JobListing]:
         now = datetime.utcnow()
+        requirements = [
+            JobRequirement(skill="python"),
+            JobRequirement(skill="machine learning"),
+        ]
         return [
             JobListing(
                 provider=self.provider_name,
@@ -28,10 +32,8 @@ class IndeedConnector(JobConnector):
                 role=f"{query.title()} Research Intern",
                 location="Austin, TX",
                 description="Prototype search ranking improvements for job seekers.",
-                requirements=[
-                    JobRequirement(skill="python"),
-                    JobRequirement(skill="machine learning"),
-                ],
+                requirements=requirements,
+                technologies=[req.skill for req in requirements],
                 apply_url="https://indeed.com/mock",
                 posted_at=now - timedelta(days=3),
                 metadata={"mock": True},
