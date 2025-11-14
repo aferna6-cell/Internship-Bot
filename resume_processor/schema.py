@@ -81,6 +81,18 @@ class ProjectIdea:
 
 
 @dataclass
+class JobPosting:
+    """Represents a job posting relevant to the candidate."""
+
+    title: str
+    company: Optional[str] = None
+    location: Optional[str] = None
+    technologies: List[str] = field(default_factory=list)
+    url: Optional[str] = None
+    source: Optional[str] = None
+
+
+@dataclass
 class ResumeSchema:
     """Container for all resume metadata."""
 
@@ -94,6 +106,7 @@ class ResumeSchema:
     artifact_profiles: List[ArtifactProfile] = field(default_factory=list)
     optimization_suggestions: List[OptimizationSuggestion] = field(default_factory=list)
     project_ideas: List[ProjectIdea] = field(default_factory=list)
+    job_postings: List[JobPosting] = field(default_factory=list)
     raw_text: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -119,6 +132,7 @@ class ResumeSchema:
             artifact_profiles=build_list("artifact_profiles", ArtifactProfile),
             optimization_suggestions=build_list("optimization_suggestions", OptimizationSuggestion),
             project_ideas=build_list("project_ideas", ProjectIdea),
+            job_postings=build_list("job_postings", JobPosting),
             raw_text=data.get("raw_text"),
         )
 
@@ -133,6 +147,7 @@ T = TypeVar(
     ArtifactProfile,
     OptimizationSuggestion,
     ProjectIdea,
+    JobPosting,
     ResumeSchema,
 )
 
