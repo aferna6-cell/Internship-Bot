@@ -26,6 +26,7 @@ class JobListing:
     location: Optional[str]
     description: str
     requirements: Sequence[JobRequirement] = field(default_factory=list)
+    technologies: Sequence[str] = field(default_factory=list)
     apply_url: Optional[str] = None
     posted_at: Optional[datetime] = None
     metadata: dict = field(default_factory=dict)
