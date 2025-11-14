@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from .analysis.optimizer import optimize_schema
 from .config import (
@@ -15,6 +15,8 @@ from .config import (
     UserPreferences,
 )
 from .parsing.factory import parse_resume
+from .profile_sources import fetch_linkedin_artifacts, fetch_portfolio_artifacts
+from .schema import to_json_ready
 from .profile_optimizer import (
     LinkedInProfile,
     PortfolioArtifact,
@@ -32,11 +34,7 @@ def parse_command(args: argparse.Namespace) -> None:
     output = schema.to_dict()
     if args.include_preferences:
         output["preferences"] = preferences_to_dict(load_preferences())
-    payload = json.dumps(output, indent=2 if args.pretty else None)
-    if args.output:
-        Path(args.output).write_text(payload, encoding="utf-8")
-    else:
-        print(payload)
+    _emit_json(output, args.pretty, args.output)
 
 
 def show_preferences(_: argparse.Namespace) -> None:
@@ -75,6 +73,14 @@ def _split_csv(value: str | None) -> List[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def fetch_linkedin_command(args: argparse.Namespace) -> None:
+    artifacts = fetch_linkedin_artifacts(args.file)
+    _emit_json(to_json_ready(artifacts), args.pretty, args.output)
+
+
+def fetch_portfolio_command(args: argparse.Namespace) -> None:
+    artifacts = fetch_portfolio_artifacts(args.location)
+    _emit_json(to_json_ready(artifacts), args.pretty, args.output)
 def _load_json(path: str) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
@@ -157,6 +163,22 @@ def build_parser() -> argparse.ArgumentParser:
     interactive_parser = prefs_sub.add_parser("interactive", help="Interactive preference editor")
     interactive_parser.set_defaults(func=interactive_preferences)
 
+    profile_parser = subparsers.add_parser(
+        "profile", help="Fetch external profile data (LinkedIn exports, portfolios)"
+    )
+    profile_sub = profile_parser.add_subparsers(dest="profile_command", required=True)
+
+    linkedin_parser = profile_sub.add_parser("linkedin", help="Parse a LinkedIn export file")
+    linkedin_parser.add_argument("file", help="Path to the LinkedIn export (JSON/ZIP)")
+    _add_output_args(linkedin_parser)
+    linkedin_parser.set_defaults(func=fetch_linkedin_command)
+
+    portfolio_parser = profile_sub.add_parser(
+        "portfolio", help="Fetch a portfolio URL or local file"
+    )
+    portfolio_parser.add_argument("location", help="URL, file path, or file:// reference")
+    _add_output_args(portfolio_parser)
+    portfolio_parser.set_defaults(func=fetch_portfolio_command)
     optimize_parser = subparsers.add_parser(
         "optimize",
         help="Generate optimization suggestions for a resume + LinkedIn profile",
@@ -188,6 +210,19 @@ def build_parser() -> argparse.ArgumentParser:
     optimize_parser.set_defaults(func=optimize_profiles)
 
     return parser
+
+
+def _add_output_args(subparser: argparse.ArgumentParser) -> None:
+    subparser.add_argument("--output", help="Optional file to write JSON output")
+    subparser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
+
+
+def _emit_json(data: Any, pretty: bool, output: str | None) -> None:
+    payload = json.dumps(data, indent=2 if pretty else None)
+    if output:
+        Path(output).write_text(payload, encoding="utf-8")
+    else:
+        print(payload)
 
 
 def main(argv: List[str] | None = None) -> None:

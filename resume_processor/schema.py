@@ -41,6 +41,15 @@ class TargetIndustry:
 
 
 @dataclass
+class ProfileArtifact:
+    """Represents supplemental profile information from external sources."""
+
+    source: str
+    artifact_type: str
+    retrieved_at: str
+    content_snippet: str
+    url: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 class ArtifactProfile:
     """Metadata about notable projects or portfolio artifacts."""
 
@@ -78,6 +87,7 @@ class ResumeSchema:
     skills: List[Skill] = field(default_factory=list)
     timeline_constraints: List[TimelineConstraint] = field(default_factory=list)
     target_industries: List[TargetIndustry] = field(default_factory=list)
+    profile_artifacts: List[ProfileArtifact] = field(default_factory=list)
     artifact_profiles: List[ArtifactProfile] = field(default_factory=list)
     optimization_suggestions: List[OptimizationSuggestion] = field(default_factory=list)
     project_ideas: List[ProjectIdea] = field(default_factory=list)
@@ -102,6 +112,7 @@ class ResumeSchema:
             skills=build_list("skills", Skill),
             timeline_constraints=build_list("timeline_constraints", TimelineConstraint),
             target_industries=build_list("target_industries", TargetIndustry),
+            profile_artifacts=build_list("profile_artifacts", ProfileArtifact),
             artifact_profiles=build_list("artifact_profiles", ArtifactProfile),
             optimization_suggestions=build_list("optimization_suggestions", OptimizationSuggestion),
             project_ideas=build_list("project_ideas", ProjectIdea),
@@ -115,6 +126,7 @@ T = TypeVar(
     Skill,
     TimelineConstraint,
     TargetIndustry,
+    ProfileArtifact,
     ArtifactProfile,
     OptimizationSuggestion,
     ProjectIdea,
