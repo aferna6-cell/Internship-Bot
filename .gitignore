@@ -1,4 +1,6 @@
 __pycache__/
+*.egg-info/
+.internship_bot/
 *.pyc
 .env
 .mypy_cache/
