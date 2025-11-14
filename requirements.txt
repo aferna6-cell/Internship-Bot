@@ -1,0 +1,5 @@
+fastapi==0.110.0
+uvicorn[standard]==0.27.0
+pydantic==1.10.14
+gspread==6.0.2
+google-auth==2.27.0
